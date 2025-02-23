@@ -2,10 +2,9 @@ import networkx as nx
 
 
 def build_graph():
-    """Створює орієнтований граф логістичної мережі."""
+
     G = nx.DiGraph()
 
-    # Додаємо ребра (термінали -> склади -> магазини) з пропускною здатністю
     edges = [
         ("T1", "S1", 10),
         ("T1", "S2", 15),
@@ -31,22 +30,18 @@ def build_graph():
 
 
 def analyze_results(flow_dict, G):
-    """Аналізує результати потоку."""
     print("\n🔍 Аналіз результатів:")
 
-    # Підрахунок потоку через термінали
     terminal_flows = {}
     for u in G.nodes():
-        if u.startswith("T"):  # Всі вузли, що є терміналами
+        if u.startswith("T"):
             terminal_flows[u] = sum(flow_dict[u][v] for v in flow_dict[u])
 
-    # Визначення найбільш завантаженого терміналу
     max_terminal = max(terminal_flows, key=terminal_flows.get, default="Немає потоку")
     print(
         f"Термінал з найбільшим потоком: {max_terminal} ({terminal_flows[max_terminal]} одиниць)"
     )
 
-    # Визначення 3-х найвужчих місць
     min_capacity_edges = sorted(
         [(u, v, d["capacity"]) for u, v, d in G.edges(data=True)], key=lambda x: x[2]
     )[:3]
@@ -54,7 +49,6 @@ def analyze_results(flow_dict, G):
     for u, v, capacity in min_capacity_edges:
         print(f"  {u} -> {v}: {capacity} одиниць")
 
-    # Магазин, що отримав найменший потік
     store_flows = {
         v: sum(flow_dict[u][v] for u in flow_dict if v in flow_dict[u])
         for v in G.nodes()
@@ -70,7 +64,6 @@ def main():
     G = build_graph()
     source, sink = "T1", "M14"
 
-    # Використання алгоритму Форд-Фалкерсона для знаходження максимального потоку
     max_flow_value, flow_dict = nx.maximum_flow(G, source, sink)
 
     print(f"Максимальний потік з {source} до {sink}: {max_flow_value}")
